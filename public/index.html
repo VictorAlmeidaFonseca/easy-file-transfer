@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>📤 Enviar Arquivos</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body class="min-h-screen bg-gray-100 flex items-center justify-center p-6">
 
@@ -21,7 +21,7 @@
     </div>
 
     <!-- INPUT BONITO COM DRAG & DROP -->
-    <label for="fileInput" id="dropArea" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition text-center">
+    <label for="fileInput" id="dropArea" class="flex flex-col items-center justify-center w-full h-32 border-1 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition text-center">
       <div class="flex flex-col items-center justify-center pt-4 pb-4 pointer-events-none">
         <svg class="w-8 h-8 mb-2 text-gray-500" aria-hidden="true" fill="none" stroke="currentColor"
           viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -139,10 +139,15 @@
         li.className = 'file-item flex items-center justify-between border rounded px-2 py-1 transition-all duration-300 ease-in-out';
         li.dataset.index = index;
 
-        const preview = file.type.startsWith('image/')
-          ? `<img src="${URL.createObjectURL(file)}" class="w-10 h-10 object-cover rounded" alt="preview" />`
-          : `<div class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded text-gray-500">📄</div>`;
+        let preview = '';
 
+            if (file.name.endsWith('.jwpub') || file.name.endsWith('.jw')) {
+            preview = `<img src="/image.png" class="w-10 h-10 object-cover rounded" alt="jwpub preview" />`;
+            } else if (file.type.startsWith('image/')) {
+            preview = `<img src="${URL.createObjectURL(file)}" class="w-10 h-10 object-cover rounded" alt="preview" />`;
+            } else {
+            preview = `<div class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded text-gray-500">📄</div>`;
+            }
         li.innerHTML = `
           <div class="flex items-center gap-2">
             ${preview}

@@ -4,8 +4,6 @@ const os = require('os');
 const path = require('path');
 const { startServer } = require('./server.cjs');
 
-let serverUrl = '';
-
 function createWindow() {
   const win = new BrowserWindow({
     width: 520,
@@ -25,10 +23,11 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, 'internal', 'index.html'));
   }
+  
 }
 
 app.whenReady().then(() => {
-  // Inicia o servidor e registra função de seleção de pasta
+  process.env.USER_DATA_PATH = app.getPath('userData');
   const serverUrl = startServer();
   ipcMain.handle('get-server-url', () => serverUrl)
   createWindow();
