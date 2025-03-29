@@ -1,47 +1,102 @@
-# Svelte + TS + Vite
+# 📁 FileTransferApp
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+**FileTransferApp** é uma aplicação leve feita com **Electron**, **HTML**, **CSS (Tailwind)** e **JavaScript puro**, que permite enviar arquivos do celular para o computador de forma simples e rápida, via rede local.
 
-## Recommended IDE Setup
+## ✨ Funcionalidades
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- Envie arquivos do seu celular diretamente para o computador
+- Visualização por QR Code
+- Interface leve, responsiva e amigável
+- Visualização de miniaturas e arquivos duplicados
+- Suporte a arquivos especiais `.jwpub`, `.jw` com ícone personalizado
+- Armazenamento organizado por data
+- Limpeza automática dos arquivos temporários
+- Log de erros no sistema para auditoria local
 
-## Need an official Svelte framework?
+---
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## 🚀 Como usar
 
-## Technical considerations
+### 1. Abra o aplicativo no computador
+- Ao iniciar o app, será exibida a tela com o QR Code.
 
-**Why use this over SvelteKit?**
+### 2. Conecte-se à mesma rede Wi-Fi
+- O celular e o computador devem estar na mesma rede local.
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+### 3. Escaneie o QR Code com o celular
+- Isso abrirá a interface de upload no navegador do seu celular.
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+### 4. Selecione os arquivos
+- Clique ou arraste arquivos para a área destacada.
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+### 5. Envie!
+- Acompanhe o progresso e receba confirmação ao final.
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+---
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+## 📦 Instalação
 
-**Why include `.vscode/extensions.json`?**
+### Windows / macOS / Linux
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+Baixe o instalador mais recente diretamente na aba [Releases](https://github.com/seu-usuario/file-transfer-app/releases) do repositório.
 
-**Why enable `allowJs` in the TS template?**
+Ou clone manualmente:
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+git clone https://github.com/seu-usuario/file-transfer-app.git
+cd file-transfer-app
+pnpm install
+pnpm start
 ```
+
+---
+
+## 🗂️ Estrutura do projeto
+
+```text
+📦 file-transfer-app
+├── electron/
+│   ├── main.cjs        # Processo principal do Electron
+│   ├── preload.cjs     # Bridge segura para IPC
+│   ├── server.cjs      # Servidor Express para uploads
+│   └── internal/index.html # Interface principal do app
+├── public/             # Página acessada via QR Code
+│   └── upload.html     # Upload dos arquivos via navegador
+├── uploads_tmp/        # Arquivos temporários (auto-limpeza)
+├── assets/             # Ícones da aplicação
+├── package.json
+└── README.md
+```
+
+---
+
+## 🛡️ Segurança
+
+- Os arquivos são armazenados com nomes seguros (`sanitize-filename`)
+- Toda tentativa de path traversal é bloqueada
+- O app não expõe seu computador na internet
+- Os uploads são limitados a 50MB por arquivo
+- Diretório de upload temporário é oculto e limpo automaticamente
+
+---
+
+## 🔍 Logs
+
+Erros são registrados automaticamente em:
+
+- **macOS**: `~/Library/Application Support/FileTransferApp/logs/error.log`
+- **Windows**: `%APPDATA%/FileTransferApp/logs/error.log`
+- **Linux**: `~/.config/FileTransferApp/logs/error.log`
+
+---
+
+## 👨‍💻 Autor
+
+Desenvolvido com ❤️ por **Nicole Pache**  
+📬 [@VictorAlmeidaFonseca](https://github.com/VictorAlmeidaFonseca)
+
+---
+
+## 📃 Licença
+
+Este projeto está licenciado sob a **MIT License**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
