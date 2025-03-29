@@ -92,7 +92,7 @@ Erros são registrados automaticamente em:
 
 ## 👨‍💻 Autor
 
-Desenvolvido com ❤️ por **Nicole Pache**  
+Desenvolvido por **Victor Fonseca**  
 📬 [@VictorAlmeidaFonseca](https://github.com/VictorAlmeidaFonseca)
 
 ---
