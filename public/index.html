@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📤 Enviar Arquivos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+
+  <div class="w-full max-w-md bg-white p-6 rounded-xl shadow space-y-4">
+    <h2 class="text-lg font-semibold text-gray-800 text-center">📤 Enviar Arquivos</h2>
+
+    <!-- ALERTA -->
+    <div id="alert" class="hidden relative p-4 pr-12 text-sm text-yellow-800 rounded-lg bg-yellow-100 border border-yellow-300 flex items-start gap-2" role="alert">
+      <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.72-1.36 3.485 0l6.516 11.59c.75 1.334-.213 2.987-1.742 2.987H3.483c-1.53 0-2.492-1.653-1.742-2.987L8.257 3.1zM11 13a1 1 0 10-2 0 1 1 0 002 0zm-1-2a1 1 0 01-1-1V7a1 1 0 112 0v3a1 1 0 01-1 1z" clip-rule="evenodd" />
+      </svg>
+      <span id="alertText" class="flex-1">Texto do alerta</span>
+      <button id="alertClose" type="button" class="absolute top-2 right-2 text-yellow-700 hover:text-yellow-900 rounded-lg focus:outline-none" aria-label="Fechar">❌</button>
+    </div>
+
+    <!-- INPUT BONITO COM DRAG & DROP -->
+    <label for="fileInput" id="dropArea" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition text-center">
+      <div class="flex flex-col items-center justify-center pt-4 pb-4 pointer-events-none">
+        <svg class="w-8 h-8 mb-2 text-gray-500" aria-hidden="true" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 16v-4a4 4 0 014-4h0a4 4 0 014 4v4m-4-4v8m-4-4h8"></path>
+        </svg>
+        <p class="text-sm text-gray-500"><span class="font-semibold">Clique</span> ou <span class="font-semibold">arraste</span> os arquivos aqui</p>
+      </div>
+      <input id="fileInput" type="file" class="hidden" multiple />
+    </label>
+
+    <!-- LISTA DE ARQUIVOS -->
+    <ul id="fileList" class="text-xs text-gray-700 space-y-2"></ul>
+
+    <!-- BOTÃO LIMPAR TODOS -->
+    <button
+      id="clearAllBtn"
+      class="hidden w-full flex items-center justify-center gap-2 px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 text-sm font-medium rounded-lg transition mt-2"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      Limpar todos os arquivos
+    </button>
+
+    <!-- BOTÃO ENVIAR -->
+    <button id="uploadBtn" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">
+      Enviar
+    </button>
+
+    <!-- BARRA DE PROGRESSO -->
+    <div id="progressContainer" class="w-full bg-gray-200 rounded-full h-2.5 hidden">
+      <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+    </div>
+
+    <!-- MENSAGEM -->
+    <p id="message" class="text-center text-sm text-gray-700 mt-2"></p>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const message = document.getElementById('message');
+    const alertBox = document.getElementById('alert');
+    const alertText = document.getElementById('alertText');
+    const alertClose = document.getElementById('alertClose');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const dropArea = document.getElementById('dropArea');
+
+    let files = [];
+    let alertTimeout;
+
+    // Drag & Drop funcional
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.classList.add('border-blue-400', 'bg-blue-50');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.classList.remove('border-blue-400', 'bg-blue-50');
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.classList.remove('border-blue-400', 'bg-blue-50');
+      handleFiles(Array.from(e.dataTransfer.files));
+    });
+
+    fileInput.addEventListener('change', () => {
+      handleFiles(Array.from(fileInput.files));
+    });
+
+    function handleFiles(newFiles) {
+      let duplicateFound = false;
+
+      for (const newFile of newFiles) {
+        const exists = files.some(f => f.name === newFile.name && f.size === newFile.size);
+        if (exists) {
+          showAlert(`⚠️ O arquivo "${newFile.name}" já foi adicionado.`);
+          duplicateFound = true;
+        } else {
+          files.push(newFile);
+        }
+      }
+
+      if (!duplicateFound) hideAlert();
+      renderFileList();
+      message.textContent = '';
+    }
+
+    alertClose.addEventListener('click', hideAlert);
+
+    function showAlert(text) {
+      alertText.textContent = text;
+      alertBox.classList.remove('hidden');
+      clearTimeout(alertTimeout);
+      alertTimeout = setTimeout(() => {
+        hideAlert();
+      }, 4000);
+    }
+
+    function hideAlert() {
+      alertBox.classList.add('hidden');
+      alertText.textContent = '';
+    }
+
+    function renderFileList() {
+      fileList.innerHTML = '';
+      files.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.className = 'file-item flex items-center justify-between border rounded px-2 py-1 transition-all duration-300 ease-in-out';
+        li.dataset.index = index;
+
+        const preview = file.type.startsWith('image/')
+          ? `<img src="${URL.createObjectURL(file)}" class="w-10 h-10 object-cover rounded" alt="preview" />`
+          : `<div class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded text-gray-500">📄</div>`;
+
+        li.innerHTML = `
+          <div class="flex items-center gap-2">
+            ${preview}
+            <span class="break-words whitespace-normal max-w-[180px] block text-left">${file.name}</span>
+          </div>
+          <button class="text-red-500 hover:text-red-700" data-index="${index}" aria-label="Remover">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4m-4 0a1 1 0 00-1 1v1h6V4a1 1 0 00-1-1m-4 0h4" />
+            </svg>
+          </button>
+        `;
+
+        fileList.appendChild(li);
+      });
+
+      fileList.querySelectorAll('button[aria-label="Remover"]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const index = parseInt(e.currentTarget.dataset.index);
+          const li = e.currentTarget.closest('li');
+          const confirmDelete = confirm(`Deseja remover "${files[index].name}"?`);
+          if (!confirmDelete) return;
+          li.classList.add('opacity-0', 'translate-x-4');
+          setTimeout(() => {
+            files.splice(index, 1);
+            renderFileList();
+          }, 300);
+        });
+      });
+
+      clearAllBtn.classList.toggle('hidden', files.length === 0);
+    }
+
+    clearAllBtn.addEventListener('click', () => {
+      const confirmClear = confirm("Deseja remover todos os arquivos da lista?");
+      if (!confirmClear) return;
+      fileList.querySelectorAll('li').forEach((li) => {
+        li.classList.add('opacity-0', 'translate-x-4');
+      });
+      setTimeout(() => {
+        files = [];
+        renderFileList();
+        fileInput.value = '';
+      }, 300);
+    });
+
+    uploadBtn.addEventListener('click', () => {
+      if (files.length === 0) {
+        message.textContent = 'Nenhum arquivo selecionado.';
+        return;
+      }
+
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append('file', file);
+      }
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload', true);
+
+      xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+          const percent = (e.loaded / e.total) * 100;
+          progressBar.style.width = percent + '%';
+          progressContainer.classList.remove('hidden');
+        }
+      };
+
+      xhr.onload = function () {
+        progressContainer.classList.add('hidden');
+        message.textContent = xhr.status === 200
+          ? `✅ ${xhr.responseText}`
+          : '❌ Erro ao enviar arquivos.';
+        files = [];
+        renderFileList();
+        fileInput.value = '';
+      };
+
+      xhr.onerror = function () {
+        progressContainer.classList.add('hidden');
+        message.textContent = '❌ Erro na conexão.';
+      };
+
+      message.textContent = '';
+      progressBar.style.width = '0%';
+      xhr.send(formData);
+    });
+  </script>
+</body>
+</html>
